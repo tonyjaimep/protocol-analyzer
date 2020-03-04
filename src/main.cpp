@@ -27,6 +27,7 @@ int main()
 	cout << "\t\t" << "Throughput: " << ef.getIpFrame()->getThroughputAsString() << endl;
 	cout << "\t\t" << "Reliability: " << ef.getIpFrame()->getReliabilityAsString() << endl;
 	cout << "\t\t" << "Reserved bits: " << (ef.getIpFrame()->getReservedTosBits() ? "NOT ZERO" : "00 (OK)") << endl;
+	cout << "\tEND TYPE OF SERVICE" << endl;
 	cout << "\tTotal Length: " << dec << ef.getIpFrame()->getTotalLength() << " bytes" << endl;
 	cout << "\tID (hex): " << hex << ef.getIpFrame()->getId() << endl;
 	cout << "\tDF: " << ef.getIpFrame()->getDf();
@@ -59,7 +60,7 @@ int main()
 
 	cout << "\tTTL: " << dec << ef.getIpFrame()->getTtl() << "s" << endl;
 	cout << "\tProtocol (hex): " << hex << ef.getIpFrame()->getProtocol()
-		<< "(" << ef.getIpFrame()->getProtocolAsString() << ")" << endl;
+		<< " (" << ef.getIpFrame()->getProtocolAsString() << ")" << endl;
 	cout << "\tSource Address: " << ef.getIpFrame()->getSourceAddressAsString() << endl;
 	cout << "\tDestination Address: " << ef.getIpFrame()->getDestinationAddressAsString() << endl;
 

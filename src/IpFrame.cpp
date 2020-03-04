@@ -119,40 +119,63 @@ unsigned IpFrame::getReservedTosBits() const
 string IpFrame::getPrecedenceAsString() const
 {
 	switch (getPrecedence()) {
-		case 0b111:
-			return "Network Control";
-			break;
-		case 0b110:
-			return "Internetwork Control";
-			break;
-		case 0b101:
-			return "CRITIC / ECP";
-			break;
-		case 0b100:
-			return "Flash Override";
-			break;
-		case 0b011:
-			return "Flash";
-			break;
-		case 0b010:
-			return "Immediate";
-			break;
-		case 0b001:
-			return "Priority";
-			break;
-		case 0b000:
-			return "Routine";
-			break;
-		default:
-			return "Unknown";
-			break;
+	case 0b111:
+		return "Network Control";
+		break;
+	case 0b110:
+		return "Internetwork Control";
+		break;
+	case 0b101:
+		return "CRITIC / ECP";
+		break;
+	case 0b100:
+		return "Flash Override";
+		break;
+	case 0b011:
+		return "Flash";
+		break;
+	case 0b010:
+		return "Immediate";
+		break;
+	case 0b001:
+		return "Priority";
+		break;
+	case 0b000:
+		return "Routine";
+		break;
+	default:
+		return "Unknown";
+		break;
 	}
 }
 
 string IpFrame::getProtocolAsString() const
 {
 	switch (getProtocol()) {
-
+	case IP_PROTOCOL_HOPOPT:
+		return "HOPOPT";
+		break;
+	case IP_PROTOCOL_ICMP:
+		return "ICMP";
+		break;
+	case IP_PROTOCOL_IGMP:
+		return "IGMP";
+		break;
+	case IP_PROTOCOL_GGP:
+		return "GGP";
+		break;
+	case IP_PROTOCOL_IP_IN_IP:
+		return "IP-in-IP";
+		break;
+	case IP_PROTOCOL_ST:
+		return "ST";
+		break;
+	case IP_PROTOCOL_TCP:
+		return "TCP";
+		break;
+	default:
+		return "Unknown";
+		break;
 	}
 }
 
@@ -172,23 +195,18 @@ string IpFrame::addressToString(const unsigned& address) const
 
 void IpFrame::calculateCheckSum()
 {
-
-	unsigned long cs(0);
-	cs += ~(getVersion() * 0x1000 + getIhl() * 0x100 + getService());
+	unsigned long cs;
+	cs = ~(getVersion() * 0x1000 + getIhl() * 0x100 + getService());
 	cs += ~(getTotalLength());
 	cs += ~(getId());
 	cs += ~((getDf() << 14) + (getMf() << 13) + getOffset());
 	cs += ~(getTtl() * 0x100 + getProtocol());
-	cs = cs + cs / 0x10000;
-	cs = cs & 0xFFFF;
-	// checksum is 0x0000
-	// one's complement = 0xFFFF
-	cs += 0xFFFF;
+	cs += ~(0xFFFF);
 	cs += ~(getSourceAddress() / 0x10000);
 	cs += ~(getSourceAddress() & 0xFFFF);
 	cs += ~(getDestinationAddress() / 0x10000);
 	cs += ~(getDestinationAddress() & 0xFFFF);
-	cs += (cs & 0xFFFF0000 >> 32);
+	cs += ((cs & 0xFFFF0000) >> 32);
 	this->calculatedCheckSum = cs;
 }
 
