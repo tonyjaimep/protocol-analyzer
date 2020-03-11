@@ -12,6 +12,8 @@ typedef enum {
 	OPT_EXIT
 } MenuOption;
 
+void clearScreen();
+
 void analizeFile(string);
 void analizeInterface();
 
@@ -23,6 +25,7 @@ int main()
 
 	do {
 		menuOption = menu();
+		clearScreen();
 		switch (menuOption) {
 		case OPT_FILE:
 			analizeFile("test/frame.bin");
@@ -32,6 +35,7 @@ int main()
 			break;
 		case OPT_EXIT:
 			cout << "Exiting" << endl;
+			break;
 		default:
 			cout << "Pick a valid option" << endl;
 		}
@@ -114,11 +118,23 @@ MenuOption menu()
 {
 	MenuOption option;
 	unsigned optionBuffer;
-	cout << "MENU:" << endl;
+	cout << "------------------------------" << endl;
+	cout << "\t\tMENU:" << endl;
+	cout << "------------------------------" << endl;
 	cout << OPT_FILE << ") Analize a file" << endl;
 	cout << OPT_INTERFACE << ") Analize interface traffic" << endl;
+	cout << OPT_EXIT << ") Exit" << endl;
 	cout << "Choose an option: ";
 	cin >> optionBuffer;
 	option = static_cast<MenuOption>(optionBuffer);
 	return option;
+}
+
+void clearScreen()
+{
+#ifdef _WIN32
+	system("cls");
+#else
+	system("clear");
+#endif
 }
