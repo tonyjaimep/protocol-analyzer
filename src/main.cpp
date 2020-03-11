@@ -51,6 +51,8 @@ void analizeFile(string filename)
 	}
 
 	EthernetFrame ef(frameFile);
+	const IpFrame* ipf(ef.getIpFrame());
+	const TcpFrame* tcpf(ipf->getTcpFrame());
 
 	cout << "START ETHERNET FRAME" << endl;
 	cout << "Source MAC Address: ";
@@ -59,28 +61,28 @@ void analizeFile(string filename)
 	cout << ef.getDestinationAddressAsString() << endl;
 	cout << "Type: " << ef.getEthertypeAsString() << endl;
 	cout << "START IP HEADER:" << endl;
-	cout << "\tVersion: " << hex << ef.getIpFrame()->getVersion() << endl;
-	cout << "\tIHL: " << ef.getIpFrame()->getIhl() << endl;
+	cout << "\tVersion: " << hex << ipf->getVersion() << endl;
+	cout << "\tIHL: " << ipf->getIhl() << endl;
 	cout << "\tTYPE OF SERVICE" << endl;
-	cout << "\t\t" << "Precedence: " << ef.getIpFrame()->getPrecedence() << " (" << ef.getIpFrame()->getPrecedenceAsString() << ")" << endl;
-	cout << "\t\t" << "Delay: " << ef.getIpFrame()->getDelayAsString() << endl;
-	cout << "\t\t" << "Throughput: " << ef.getIpFrame()->getThroughputAsString() << endl;
-	cout << "\t\t" << "Reliability: " << ef.getIpFrame()->getReliabilityAsString() << endl;
-	cout << "\t\t" << "Reserved bits: " << (ef.getIpFrame()->getReservedTosBits() ? "NOT ZERO" : "00 (OK)") << endl;
+	cout << "\t\t" << "Precedence: " << ipf->getPrecedence() << " (" << ipf->getPrecedenceAsString() << ")" << endl;
+	cout << "\t\t" << "Delay: " << ipf->getDelayAsString() << endl;
+	cout << "\t\t" << "Throughput: " << ipf->getThroughputAsString() << endl;
+	cout << "\t\t" << "Reliability: " << ipf->getReliabilityAsString() << endl;
+	cout << "\t\t" << "Reserved bits: " << (ipf->getReservedTosBits() ? "NOT ZERO" : "00 (OK)") << endl;
 	cout << "\tEND TYPE OF SERVICE" << endl;
-	cout << "\tTotal Length: " << dec << ef.getIpFrame()->getTotalLength() << " bytes" << endl;
-	cout << "\tID (hex): " << hex << ef.getIpFrame()->getId() << endl;
-	cout << "\tDF: " << ef.getIpFrame()->getDf();
+	cout << "\tTotal Length: " << dec << ipf->getTotalLength() << " bytes" << endl;
+	cout << "\tID (hex): " << hex << ipf->getId() << endl;
+	cout << "\tDF: " << ipf->getDf();
 
-	if (ef.getIpFrame()->getDf())
+	if (ipf->getDf())
 		cout << " (Don't fragment)";
 	else
 		cout << " (Is fragmented)";
 	cout << endl;
 
-	cout << "\tMF: " << ef.getIpFrame()->getMf();
+	cout << "\tMF: " << ipf->getMf();
 	
-	if (ef.getIpFrame()->getMf()) {
+	if (ipf->getMf()) {
 		cout << " (More frames)";
 	} else {
 		cout << " (Is last frame)";
@@ -88,23 +90,35 @@ void analizeFile(string filename)
 
 	cout << endl;
 
-	cout << "\tOffset: " << ef.getIpFrame()->getOffset() << endl;
+	cout << "\tOffset: " << ipf->getOffset() << endl;
 
-	cout << "\tChecksum (hex): " << hex << ef.getIpFrame()->getCheckSum() << endl;
-	cout << "\tCalculated checksum (hex): " << hex << ef.getIpFrame()->getCalculatedCheckSum() << endl;
+	cout << "\tChecksum (hex): " << hex << ipf->getCheckSum() << endl;
+	cout << "\tCalculated checksum (hex): " << hex << ipf->getCalculatedCheckSum() << endl;
 	cout << '\t';
-	if (ef.getIpFrame()->checksumIsOk())
+	if (ipf->checksumIsOk())
 		cout << "Checksum OK" << endl;
 	else
 		cout << "CHECKSUM NOT MATCHED" << endl;
 
-	cout << "\tTTL: " << dec << ef.getIpFrame()->getTtl() << "s" << endl;
-	cout << "\tProtocol (hex): " << hex << ef.getIpFrame()->getProtocol()
-		<< " (" << ef.getIpFrame()->getProtocolAsString() << ")" << endl;
-	cout << "\tSource Address: " << ef.getIpFrame()->getSourceAddressAsString() << endl;
-	cout << "\tDestination Address: " << ef.getIpFrame()->getDestinationAddressAsString() << endl;
+	cout << "\tTTL: " << dec << ipf->getTtl() << "s" << endl;
+	cout << "\tProtocol (hex): " << hex << ipf->getProtocol()
+		<< " (" << ipf->getProtocolAsString() << ")" << endl;
+	cout << "\tSource Address: " << ipf->getSourceAddressAsString() << endl;
+	cout << "\tDestination Address: " << ipf->getDestinationAddressAsString() << endl;
 
-	cout << "END IP FRAME" << endl;
+	cout << "\tSTART TCP HEADER" << endl;
+	cout << "\t\tSource Port: " << tcpf->getSourcePortAsString() << endl;
+	cout << "\t\tDestination Port: " << tcpf->getDestinationPortAsString() << endl;
+	cout << "\t\tSequence Number: " << tcpf->getSequenceNumber() << endl;
+	cout << "\t\tAcknowledgement Number: " << tcpf->getAcknowledgementNumber() << endl;
+	cout << "\t\tData Offset: " << tcpf->getDataOffset() << endl;
+	cout << "\t\tFlags: " << tcpf->getFlagsAsString() << endl;
+	cout << "\t\tWindow: " << tcpf->getWindow() << endl;
+	cout << "\t\tCheckSum: " << tcpf->getCheckSum() << endl;
+	cout << "\t\tUrgent Pointer: " << tcpf->getUrgentPointer() << endl;
+	cout << "\tEND TCP HEADER" << endl;
+
+	cout << "END IP HEADER" << endl;
 
 	frameFile.close();
 }

@@ -20,11 +20,35 @@ void IpFrame::fromBytes(const char* frameBytes)
 	setSourceAddress((frameBytes[12] << 24) + (frameBytes[13] << 16) + (frameBytes[14] << 8) + (frameBytes[15]));
 	setDestinationAddress((frameBytes[16] << 24) + (frameBytes[17] << 16) + (frameBytes[18] << 8) + (frameBytes[19]));
 	calculateCheckSum();
+
+	// if packet has options
+	if (getIhl() * getVersion() > 0x20) {
+		unsigned optionsSize(getIhl() * getVersion() - 0x20);
+		char optionsOnBytes[optionsSize];
+
+		for (unsigned i(0); i < optionsSize; i++) {
+			optionsOnBytes[i] = frameBytes[i + 19];
+		}
+		setOptions(optionsOnBytes);
+	}
+
+	// if there is a payload
+	if (getIhl() * getVersion() > getTotalLength()) {
+		const unsigned payloadStartByte = 19 + getIhl() * getVersion() - 0x20;
+		char payloadOnBytes[getPayloadLength()];
+
+		for (unsigned i(0); i < getPayloadLength(); i++) {
+			payloadOnBytes[i] = frameBytes[i + payloadStartByte];
+		}
+
+		setPayload(payloadOnBytes);
+	}
 }
 
 IpFrame::IpFrame(const char* frameBytes)
 {
 	fromBytes(frameBytes);
+	constructPayload();
 }
 
 IpFrame::IpFrame(istream& input)
@@ -32,8 +56,19 @@ IpFrame::IpFrame(istream& input)
 	char buffer[IP_STD_MIN_HEADER_LENGTH];
 	input.read(buffer, IP_STD_MIN_HEADER_LENGTH);
 	fromBytes(buffer);
-	if (getTotalLength() > IP_STD_MIN_HEADER_LENGTH)
-		input.read(options, getTotalLength() - IP_STD_MIN_HEADER_LENGTH);
+
+	// if packet has options
+	if (getIhl() * getVersion() > 0x20) {
+		const unsigned optionsSize(getIhl() * getVersion() - 0x20);
+		input.read(options, optionsSize);
+	}
+
+	// if there is a payload
+	if (getIhl() * getVersion() > getTotalLength()) {
+		input.read(payload, getPayloadLength());
+	}
+
+	constructPayload();
 }
 
 IpFrame::~IpFrame()
@@ -55,6 +90,19 @@ void IpFrame::setSourceAddress(const unsigned& sa) { sourceAddress = sa; }
 void IpFrame::setDestinationAddress(const unsigned& da) { destinationAddress = da; }
 void IpFrame::setCheckSum(const unsigned& cs) { checkSum = cs; }
 
+void IpFrame::setPayload(const char* bytes)
+{
+	for (unsigned i(0); i < getPayloadLength(); i++)
+		payload[i] = bytes[i];
+
+}
+
+void IpFrame::setOptions(const char* bytes)
+{
+	for (unsigned i(0); i < getOptionsLength(); i++)
+		options[i] = bytes[i];
+}
+
 unsigned IpFrame::getVersion() const { return version; }
 unsigned IpFrame::getIhl() const { return ihl; }
 unsigned IpFrame::getService() const { return service; }
@@ -70,6 +118,7 @@ unsigned IpFrame::getCalculatedCheckSum() const { return calculatedCheckSum; }
 const unsigned IpFrame::getDestinationAddress() const { return destinationAddress; }
 const unsigned IpFrame::getSourceAddress() const { return sourceAddress; }
 unsigned IpFrame::getPrecedence() const { return service >> 5; }
+const char* IpFrame::getPayload() const { return payload; }
 
 string IpFrame::getSourceAddressAsString() const
 {
@@ -177,6 +226,30 @@ string IpFrame::getProtocolAsString() const
 		return "Unknown";
 		break;
 	}
+}
+
+unsigned IpFrame::getPayloadLength() const
+{
+	return getTotalLength() - getIhl() * getVersion();
+}
+
+unsigned IpFrame::getOptionsLength() const
+{
+	return getIhl() * getVersion() - 0x20;
+}
+
+void IpFrame::constructPayload()
+{
+	switch (getProtocol()) {
+	case IP_PROTOCOL_TCP:
+		tcpFrame = new TcpFrame(getPayload());
+		break;
+	}
+}
+
+const TcpFrame* IpFrame::getTcpFrame() const
+{
+	return tcpFrame;
 }
 
 /* address is a bit field */

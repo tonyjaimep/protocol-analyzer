@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <TcpFrame.hpp>
+
 // measured in bits
 #define IP_STD_VERSION_LENGTH 4
 #define IP_STD_IHL_LENGTH 4
@@ -45,9 +47,15 @@ private:
 	unsigned sourceAddress : IP_STD_ADDRESS_LENGTH;
 	unsigned destinationAddress : IP_STD_ADDRESS_LENGTH;
 	char* options;
+	char* payload;
 
+	TcpFrame* tcpFrame;
+
+	unsigned getPayloadLength() const;
+	unsigned getOptionsLength() const;
 	std::string addressToString(const unsigned&) const;
 	void calculateCheckSum();
+	void constructPayload();
 
 public:
 	IpFrame();
@@ -79,6 +87,8 @@ public:
 	void setCheckSum(const unsigned&);
 	void setSourceAddress(const unsigned&);
 	void setDestinationAddress(const unsigned&);
+	void setOptions(const char*);
+	void setPayload(const char*);
 
 	// getters
 	unsigned getVersion() const;
@@ -100,6 +110,9 @@ public:
 	unsigned getThroughput() const;
 	unsigned getReliability() const;
 	unsigned getReservedTosBits() const;
+	const char* getOptions(void) const;
+	const char* getPayload(void) const;
+	const TcpFrame* getTcpFrame(void) const;
 
 	bool checksumIsOk() const;
 };

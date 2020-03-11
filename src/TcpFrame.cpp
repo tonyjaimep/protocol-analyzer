@@ -37,7 +37,21 @@ std::string TcpFrame::getDestinationPortAsString() const
 
 std::string TcpFrame::getFlagsAsString() const
 {
-	return "FLAGS";
+	stringstream ss;
+	if (flags & 0b100000)
+		ss << "URG ";
+	if (flags & 0b010000)
+		ss << "ACK ";
+	if (flags & 0b001000)
+		ss << "PSH ";
+	if (flags & 0b000100)
+		ss << "RST ";
+	if (flags & 0b000010)
+		ss << "SYN ";
+	if (flags & 0b000001)
+		ss << "FIN";
+
+	return ss.str();
 }
 
 std::string TcpFrame::portToString(const unsigned& port) const
