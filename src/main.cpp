@@ -6,9 +6,45 @@
 
 using namespace std;
 
+typedef enum {
+	OPT_FILE=1,
+	OPT_INTERFACE,
+	OPT_EXIT
+} MenuOption;
+
+void analizeFile(string);
+void analizeInterface();
+
+MenuOption menu();
+
 int main()
 {
-	ifstream frameFile("test/frame.bin", ios_base::binary);
+	MenuOption menuOption;
+
+	do {
+		menuOption = menu();
+		switch (menuOption) {
+		case OPT_FILE:
+			analizeFile("test/frame.bin");
+			break;
+		case OPT_INTERFACE:
+			analizeInterface();
+			break;
+		case OPT_EXIT:
+			cout << "Exiting" << endl;
+		default:
+			cout << "Pick a valid option" << endl;
+		}
+	} while (menuOption != OPT_EXIT);
+}
+
+void analizeFile(string filename)
+{
+	ifstream frameFile(filename, ios_base::binary);
+	if (!frameFile.is_open()) {
+		cout << "Error opening file: " << filename << endl;
+		return;
+	}
 
 	EthernetFrame ef(frameFile);
 
@@ -66,5 +102,23 @@ int main()
 
 	cout << "END IP FRAME" << endl;
 
-	return EXIT_SUCCESS;
+	frameFile.close();
+}
+
+void analizeInterface()
+{
+	cout << "Working on it!" << endl;
+}
+
+MenuOption menu()
+{
+	MenuOption option;
+	unsigned optionBuffer;
+	cout << "MENU:" << endl;
+	cout << OPT_FILE << ") Analize a file" << endl;
+	cout << OPT_INTERFACE << ") Analize interface traffic" << endl;
+	cout << "Choose an option: ";
+	cin >> optionBuffer;
+	option = static_cast<MenuOption>(optionBuffer);
+	return option;
 }
